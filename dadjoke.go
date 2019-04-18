@@ -13,7 +13,30 @@ type joke struct {
 	Status int
 }
 
-func getDadJoke() joke {
+func getDadJokePlainText() string {
+	client := &http.Client{}
+	req, err := http.NewRequest(http.MethodGet, "https://icanhazdadjoke.com/", nil)
+
+	if err != nil {
+		fmt.Printf("Error %s\n", err)
+	}
+	req.Header.Set("Accept", "text/plain")
+
+	res, getErr := client.Do(req)
+	if getErr != nil {
+		fmt.Printf("Error %s\n", err)
+	}
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		fmt.Printf("Error %s\n", err)
+	}
+
+	return string(body)
+}
+
+func getDadJokeJSON() joke {
 	client := &http.Client{}
 	req, err := http.NewRequest(http.MethodGet, "https://icanhazdadjoke.com/", nil)
 
@@ -24,7 +47,7 @@ func getDadJoke() joke {
 
 	res, getErr := client.Do(req)
 	if getErr != nil {
-		fmt.Printf("Error 2 %s\n", err)
+		fmt.Printf("Error %s\n", err)
 	}
 	defer res.Body.Close()
 
@@ -39,10 +62,14 @@ func getDadJoke() joke {
 	return dadJoke
 }
 
-func getMultipleDadJokes(numberOfJokes int) []string {
+func getMultipleDadJokes(numberOfJokes int, format string) []string {
 	jokes := make([]string, numberOfJokes)
 	for i := 0; i < numberOfJokes; i++ {
-		jokes[i] = getDadJoke().Joke
+		if format == "json" {
+			jokes[i] = getDadJokeJSON().Joke
+		} else if format == "plaintext" {
+			jokes[i] = getDadJokePlainText()
+		}
 	}
 
 	return jokes
@@ -50,8 +77,9 @@ func getMultipleDadJokes(numberOfJokes int) []string {
 
 func main() {
 	numberOfJokes := 10
-	jokes := getMultipleDadJokes(numberOfJokes)
+	format := "plaintext"
+	jokes := getMultipleDadJokes(numberOfJokes, format)
 	for i := 0; i < numberOfJokes; i++ {
-		fmt.Printf("Joke #%d: %s\n", i, jokes[i])
+		fmt.Printf("Joke #%d: %s\n", i+1, jokes[i])
 	}
 }
