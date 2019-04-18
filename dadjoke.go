@@ -39,6 +39,19 @@ func getDadJoke() joke {
 	return dadJoke
 }
 
+func getMultipleDadJokes(numberOfJokes int) []string {
+	jokes := make([]string, numberOfJokes)
+	for i := 0; i < numberOfJokes; i++ {
+		jokes[i] = getDadJoke().Joke
+	}
+
+	return jokes
+}
+
 func main() {
-	fmt.Println(getDadJoke().Joke)
+	numberOfJokes := 10
+	jokes := getMultipleDadJokes(numberOfJokes)
+	for i := 0; i < numberOfJokes; i++ {
+		fmt.Printf("Joke #%d: %s\n", i, jokes[i])
+	}
 }
