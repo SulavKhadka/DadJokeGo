@@ -1,17 +1,11 @@
 package main
 
 import (
-	"encoding/json"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 )
-
-type joke struct {
-	ID     string
-	Joke   string
-	Status int
-}
 
 func getDadJokePlainText() string {
 	client := &http.Client{}
@@ -36,7 +30,7 @@ func getDadJokePlainText() string {
 	return string(body)
 }
 
-func getDadJokeJSON() joke {
+func getDadJokeJSON() string {
 	client := &http.Client{}
 	req, err := http.NewRequest(http.MethodGet, "https://icanhazdadjoke.com/", nil)
 
@@ -56,17 +50,14 @@ func getDadJokeJSON() joke {
 		fmt.Printf("Error %s\n", err)
 	}
 
-	var dadJoke joke
-	json.Unmarshal([]byte(string(body)), &dadJoke)
-
-	return dadJoke
+	return string(body)
 }
 
 func getMultipleDadJokes(numberOfJokes int, format string) []string {
 	jokes := make([]string, numberOfJokes)
 	for i := 0; i < numberOfJokes; i++ {
 		if format == "json" {
-			jokes[i] = getDadJokeJSON().Joke
+			jokes[i] = getDadJokeJSON()
 		} else if format == "plaintext" {
 			jokes[i] = getDadJokePlainText()
 		}
@@ -76,9 +67,17 @@ func getMultipleDadJokes(numberOfJokes int, format string) []string {
 }
 
 func main() {
-	numberOfJokes := 10
-	format := "plaintext"
+
+	formatPtr := flag.String("format", "json", "The format to return the joke in.")
+	numberOfJokesPtr := flag.Int("jokes", 1, "The number of jokes to return.")
+
+	flag.Parse()
+
+	numberOfJokes := *numberOfJokesPtr
+	format := *formatPtr
+
 	jokes := getMultipleDadJokes(numberOfJokes, format)
+
 	for i := 0; i < numberOfJokes; i++ {
 		fmt.Printf("Joke #%d: %s\n", i+1, jokes[i])
 	}
